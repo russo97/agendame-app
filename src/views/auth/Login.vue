@@ -22,20 +22,16 @@
                 <Logo />
               </div>
 
-              <div class="text-body-1 text-muted text-center mb-3">
-                Your Social Campaigns
-              </div>
-
               <LoginForm />
 
               <h6 class="text-h6 text-muted font-weight-medium d-flex justify-center align-center mt-3">
-                New to Modernize?
+                Novo no AgendaMe?
 
                 <RouterLink
                   :to="{ name: 'register' }"
                   class="text-primary text-decoration-none text-body-1 opacity-1 font-weight-medium pl-2"
                 >
-                  Create an account
+                  Crie uma conta
                 </RouterLink>
               </h6>
             </v-card-item>
