@@ -88,14 +88,15 @@
 </template>
 
 <script setup lang="ts">
+import type { LoginRequiredPayload } from '@/types/auth'
+
 import axios from 'axios'
+import { object, string } from 'yup'
 import {
   useForm,
   useField
 } from 'vee-validate'
-import type {
-  LoginRequiredPayload
-} from '@/types/auth'
+import { useRouter } from 'vue-router'
 
 defineOptions({
   name: 'LoginForm',
@@ -106,27 +107,14 @@ const { handleSubmit, errors, isSubmitting } = useForm<LoginRequiredPayload>({
     email: '',
     password: ''
   },
-  validationSchema: {
-    email (value: string): string | boolean {
-      if (!/^(([\p{L}\p{N}!#$%&'*+\/=?^_`{|}~-]+(\.[\p{L}\p{N}!#$%&'*+\/=?^_`{|}~-]+)*)|("[\p{L}\p{N}\s!#$%&'*+\/=?^_`{|}~.-]+"))@(([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\.)+[a-zA-Z]{2,63}|(\[(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\]))$/u.test(value)) return 'Informe um endereço de e-mail válido'
-
-      return true
-    },
-
-    password (value: string): string | boolean {
-      if (!/\d/.test(value)) return 'Sua senha deve conter um número'
-
-      if (!/[a-z]/.test(value)) return 'Sua senha deve conter uma letra minuscula'
-
-      if (!/[A-Z]/.test(value)) return 'Sua senha deve conter uma letra maiuscula'
-
-      if (!/.{8,}/.test(value)) return 'Informe uma senha com pelo menos 8 caracteres'
-
-      if (!/[!@#$%^&*()_+{}\[\]:;<>,.?\/~\\-]/.test(value)) return 'Sua senha deve conter um caractere especial'
-
-      return true
-    }
-  }
+  validationSchema: object({
+    email: string()
+      .required('O e-mail é obrigatório')
+      .email('Informe um endereço de e-mail válido'),
+    password: string()
+      .required('A senha é obrigatória')
+      .min(8, 'Sua senha deve conter ao menos 8 caracteres')
+  })
 })
 
 const { value: email } = useField('email')
@@ -138,6 +126,8 @@ const handleLoginSubmit = handleSubmit(async values => {
 
 axios.defaults.withXSRFToken = true
 axios.defaults.withCredentials = true
+
+const router = useRouter()
 
 const feedbackMessage = ref<string | null>()
 
@@ -151,6 +141,11 @@ async function handleLogin ({ email, password }: LoginRequiredPayload) {
         .post('http://localhost:8000/api/login', {
           email: email,
           password: password,
+        })
+        .then(() => {
+          router.push({
+            name: 'dashboard',
+          })
         })
         .catch(() => {
           feedbackMessage.value = 'E-mail ou senha inválidos'
