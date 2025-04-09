@@ -11,3 +11,8 @@ export interface ErrorPattern {
 }
 
 export type AuthResponse <T> = T | ErrorPattern;
+
+export interface LoginRequiredPayload {
+  email: string;
+  password: string;
+}

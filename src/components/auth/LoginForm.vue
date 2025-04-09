@@ -7,7 +7,7 @@
     {{ feedbackMessage }}
   </v-alert>
 
-  <v-form @submit="handleLogin">
+  <v-form @submit="handleLoginSubmit">
     <v-row class="d-flex mb-3">
       <v-col
         cols="12"
@@ -23,9 +23,9 @@
         <v-text-field
           id="email"
           v-model="email"
-          :rules="[mailRules.required, mailRules.email]"
           color="primary"
           variant="outlined"
+          :error-messages="errors.email"
           placeholder="email@provider.com"
         />
       </v-col>
@@ -44,7 +44,7 @@
         <v-text-field
           id="password"
           v-model="password"
-          :rules="[passRules.required, passRules.hasMinLength, passRules.hasNumber]"
+          :error-messages="errors.password"
           color="primary"
           type="password"
           variant="outlined"
@@ -78,7 +78,7 @@
           size="large"
           type="submit"
           color="primary"
-          :loading="loading"
+          :loading="isSubmitting"
         >
           Entrar
         </v-btn>
@@ -89,55 +89,71 @@
 
 <script setup lang="ts">
 import axios from 'axios'
-import type {AuthResponse, ErrorPattern} from "@/types/auth";
+import {
+  useForm,
+  useField
+} from 'vee-validate'
+import type {
+  LoginRequiredPayload
+} from '@/types/auth'
 
 defineOptions({
   name: 'LoginForm',
 })
 
+const { handleSubmit, errors, isSubmitting } = useForm<LoginRequiredPayload>({
+  initialValues: {
+    email: '',
+    password: ''
+  },
+  validationSchema: {
+    email (value: string): string | boolean {
+      if (!/^(([\p{L}\p{N}!#$%&'*+\/=?^_`{|}~-]+(\.[\p{L}\p{N}!#$%&'*+\/=?^_`{|}~-]+)*)|("[\p{L}\p{N}\s!#$%&'*+\/=?^_`{|}~.-]+"))@(([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\.)+[a-zA-Z]{2,63}|(\[(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\]))$/u.test(value)) return 'Informe um endereço de e-mail válido'
+
+      return true
+    },
+
+    password (value: string): string | boolean {
+      if (!/\d/.test(value)) return 'Sua senha deve conter um número'
+
+      if (!/[a-z]/.test(value)) return 'Sua senha deve conter uma letra minuscula'
+
+      if (!/[A-Z]/.test(value)) return 'Sua senha deve conter uma letra maiuscula'
+
+      if (!/.{8,}/.test(value)) return 'Informe uma senha com pelo menos 8 caracteres'
+
+      if (!/[!@#$%^&*()_+{}\[\]:;<>,.?\/~\\-]/.test(value)) return 'Sua senha deve conter um caractere especial'
+
+      return true
+    }
+  }
+})
+
+const { value: email } = useField('email')
+const { value: password } = useField('password')
+
+const handleLoginSubmit = handleSubmit(async values => {
+  await handleLogin(values)
+})
+
 axios.defaults.withXSRFToken = true
 axios.defaults.withCredentials = true
 
-const email = ref('')
-const password = ref('')
-const loading = ref<boolean>(false)
 const feedbackMessage = ref<string | null>()
 
-const mailRules: Record<string, (value: string) => string | boolean> = {
-  required: (value: string) => !!value || 'Informe seu endereço de e-mail',
-  email: (value: string) => {
-    const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-
-    return pattern.test(value) || 'Informe um e-mail válido'
-  },
-}
-
-const passRules = {
-  required: (value: string) => !!value || 'Informe sua senha',
-  hasNumber: (value: string) => /\d/.test(value) || 'Sua senha deve conter ao menos um número',
-  hasMinLength: (value: string) => value.length > 7 || 'Sua senha deve conter ao menos 8 caracteres',
-}
-
-async function handleLogin (e: SubmitEvent) {
-  e.preventDefault()
-
+async function handleLogin ({ email, password }: LoginRequiredPayload) {
   feedbackMessage.value = null
 
-  loading.value = true
-
-  axios
+  await axios
     .get('http://localhost:8000/sanctum/csrf-cookie')
-    .then(() => {
-      axios
+    .then(async () => {
+      await axios
         .post('http://localhost:8000/api/login', {
-          email: email.value,
-          password: password.value,
+          email: email,
+          password: password,
         })
         .catch(() => {
           feedbackMessage.value = 'E-mail ou senha inválidos'
-        })
-        .finally(() => {
-          loading.value = false
         })
     })
 }
