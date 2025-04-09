@@ -4,6 +4,7 @@ import router from '@/router/index'
 import App from '@/App.vue'
 
 import '@/plugins/yup'
+import '@/plugins/axios'
 import vuetify from '@/plugins/vuetify'
 
 import '@/scss/style.scss'

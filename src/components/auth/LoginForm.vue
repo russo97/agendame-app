@@ -126,9 +126,6 @@ const handleLoginSubmit = handleSubmit(async values => {
   await handleLogin(values)
 })
 
-axios.defaults.withXSRFToken = true
-axios.defaults.withCredentials = true
-
 const router = useRouter()
 
 const feedbackMessage = ref<string | null>()
@@ -137,10 +134,10 @@ async function handleLogin ({ email, password }: LoginRequiredPayload) {
   feedbackMessage.value = null
 
   await axios
-    .get('http://localhost:8000/sanctum/csrf-cookie')
+    .get('/sanctum/csrf-cookie')
     .then(async () => {
       await axios
-        .post('http://localhost:8000/api/login', {
+        .post('/api/login', {
           email: email,
           password: password,
         })
