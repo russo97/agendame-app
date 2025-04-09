@@ -109,11 +109,13 @@ const { handleSubmit, errors, isSubmitting } = useForm<LoginRequiredPayload>({
   },
   validationSchema: object({
     email: string()
-      .required('O e-mail é obrigatório')
-      .email('Informe um endereço de e-mail válido'),
+      .required()
+      .email()
+      .label('E-mail'),
     password: string()
-      .required('A senha é obrigatória')
-      .min(8, 'Sua senha deve conter ao menos 8 caracteres')
+      .required()
+      .min(8)
+      .label('Senha')
   })
 })
 
