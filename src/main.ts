@@ -5,6 +5,7 @@ import App from '@/App.vue'
 
 import '@/plugins/yup'
 import '@/plugins/axios'
+import pinia from '@/plugins/pinia'
 import vuetify from '@/plugins/vuetify'
 
 import '@/scss/style.scss'
@@ -12,6 +13,7 @@ import '@/scss/style.scss'
 const app = createApp(App)
 
 app
+  .use(pinia)
   .use(router)
   .use(vuetify)
   .mount('#app')
