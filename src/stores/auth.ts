@@ -1,17 +1,14 @@
 import { defineStore } from 'pinia'
 
-import type { AuthStore } from '@/types/auth'
+import { useMeStore } from '@/stores/me'
 
 import authService from '@/services/http/auth'
 
 export const useAuthStore = defineStore('auth', {
-  state: () => <AuthStore> ({
-    user: null,
+  state: () => ({
   }),
 
-  getters: {
-    isLoggedIn: (state: AuthStore): boolean => !!state.user?.id
-  },
+  getters: {},
 
   actions: {
     sanctum () {
@@ -24,11 +21,13 @@ export const useAuthStore = defineStore('auth', {
         password
       })
 
-      if (!('error' in user)) {
-        this.$patch({
-          user: user.data
-        })
-      }
+      if ('error' in user) return user
+
+      const meStore = useMeStore()
+
+      meStore.$patch({
+        user: user.data,
+      })
 
       return user
     }

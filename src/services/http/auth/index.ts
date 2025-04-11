@@ -1,8 +1,9 @@
 import type {
   User,
   AuthResponse,
-  LoginRequiredPayload, IncomingExternalData
-} from '@/types/auth'
+  IncomingExternalData,
+} from '@/types'
+import type { LoginRequiredPayload } from '@/types/auth'
 
 import axios from 'axios'
 
@@ -24,7 +25,7 @@ export default {
   },
 
   async login (payload: LoginRequiredPayload, defaultErrorMessage = 'E-mail e/ou senha informados são inválidos.'): Promise<AuthResponse<IncomingExternalData<User>>> {
-    return axios
+    return await axios
       .post<IncomingExternalData<User>>('/api/login', payload)
       .then(response => {
         return response.data

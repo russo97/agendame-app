@@ -1,17 +1,19 @@
 import type {
+  User,
   AuthResponse,
-} from '@/types/auth'
+  IncomingExternalData,
+} from '@/types'
 
 import axios from 'axios'
 
 import { defaultErrorPattern } from '@/services/defaultErrorPattern'
 
-export default {
-  async me (defaultErrorMessage = 'Não autorizado'): Promise<AuthResponse<void>> {
+export const meService = {
+  async me (defaultErrorMessage = 'Não autorizado'): Promise<AuthResponse<IncomingExternalData<User>>> {
     return axios
       .get('/api/me')
-      .then(() => {
-        return void 0
+      .then(response => {
+        return response.data
       })
       .catch(error => {
         return defaultErrorPattern({

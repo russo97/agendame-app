@@ -4,9 +4,9 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { useAuthStore } from '@/stores/auth'
+import { useMeStore } from '@/stores/me'
 
-const authStore = useAuthStore()
+const authStore = useMeStore()
 
 const {
   user,
