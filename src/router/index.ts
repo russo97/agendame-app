@@ -10,6 +10,6 @@ export default createRouter({
       component: () => import('@/views/pages/Error404.vue')
     },
     MainRoutes,
-    AuthRoutes
+    AuthRoutes,
   ]
 })
