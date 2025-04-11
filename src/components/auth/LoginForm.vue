@@ -88,9 +88,10 @@
 </template>
 
 <script setup lang="ts">
-import type { LoginRequiredPayload } from '@/types/auth'
+import type {
+  LoginRequiredPayload
+} from '@/types/auth'
 
-import axios from 'axios'
 import { object, string } from 'yup'
 import {
   useForm,
@@ -98,9 +99,13 @@ import {
 } from 'vee-validate'
 import { useRouter } from 'vue-router'
 
+import { useAuthStore } from '@/stores/auth'
+
 defineOptions({
   name: 'LoginForm',
 })
+
+const authStore = useAuthStore()
 
 const { handleSubmit, errors, isSubmitting } = useForm<LoginRequiredPayload>({
   initialValues: {
@@ -133,22 +138,20 @@ const feedbackMessage = ref<string | null>()
 async function handleLogin ({ email, password }: LoginRequiredPayload) {
   feedbackMessage.value = null
 
-  await axios
-    .get('/sanctum/csrf-cookie')
-    .then(async () => {
-      await axios
-        .post('/api/login', {
-          email: email,
-          password: password,
-        })
-        .then(() => {
-          router.push({
-            name: 'dashboard',
-          })
-        })
-        .catch(() => {
-          feedbackMessage.value = 'E-mail ou senha inválidos'
-        })
-    })
+  const sanctumResponse = await authStore.sanctum()
+
+  if (sanctumResponse) return
+
+  const loginResponse = await authStore.login(email, password)
+
+  if ('error' in loginResponse) {
+    feedbackMessage.value = loginResponse.message
+
+    return
+  }
+
+  await router.push({
+    name: 'dashboard',
+  })
 }
 </script>

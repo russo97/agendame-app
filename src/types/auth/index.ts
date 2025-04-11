@@ -1,3 +1,4 @@
+import type {Nullable} from "@/types";
 
 export interface ErrorPattern {
   /**
@@ -10,9 +11,23 @@ export interface ErrorPattern {
   message: string;
 }
 
+export interface IncomingExternalData <T = unknown> {
+  data: T;
+}
+
 export type AuthResponse <T> = T | ErrorPattern;
 
 export interface LoginRequiredPayload {
   email: string;
   password: string;
+}
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+export interface AuthStore {
+  user: Nullable<User>;
 }
