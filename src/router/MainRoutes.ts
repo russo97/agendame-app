@@ -1,23 +1,10 @@
 import type { RouteRecordRaw } from 'vue-router'
 
-import { useMeStore } from '@/stores/me'
+import { AuthenticationRequiredGuard } from '@/router/guards'
 
 export default <RouteRecordRaw>({
   path: '/',
-  meta: {
-    requiresAuth: true
-  },
-  beforeEnter: (to, from, next) => {
-    const meStore = useMeStore()
-
-    if (!meStore.isLoggedIn) {
-      return next({
-        name: 'login',
-      })
-    }
-
-    return next()
-  },
+  beforeEnter: AuthenticationRequiredGuard,
   component: () => import('@/layouts/full/FullLayout.vue'),
   children: [
     {

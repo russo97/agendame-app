@@ -1,23 +1,13 @@
 import type { RouteRecordRaw } from 'vue-router'
 
-import { useMeStore } from '@/stores/me'
+import { AlreadyAuthenticatedGuard } from '@/router/guards'
 
 export default <RouteRecordRaw>({
   path: '/auth',
   meta: {
     requiresAuth: false
   },
-  beforeEnter: (to, from, next) => {
-    const meStore = useMeStore()
-
-    if (meStore.isLoggedIn) {
-      return next({
-        name: 'dashboard',
-      })
-    }
-
-    return next()
-  },
+  beforeEnter: AlreadyAuthenticatedGuard,
   component: () => import('@/layouts/blank/BlankLayout.vue'),
   children: [
     {
