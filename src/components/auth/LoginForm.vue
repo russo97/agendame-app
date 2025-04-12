@@ -138,10 +138,6 @@ const feedbackMessage = ref<string | null>()
 async function handleLogin ({ email, password }: LoginRequiredPayload) {
   feedbackMessage.value = null
 
-  const sanctumResponse = await authStore.sanctum()
-
-  if (sanctumResponse) return
-
   const loginResponse = await authStore.login(email, password)
 
   if ('error' in loginResponse) {
