@@ -1,5 +1,13 @@
 <template>
   <v-form @submit.prevent="submit">
+    <v-alert
+      v-if="feedbackMessage"
+      class="mb-2"
+      color="error"
+    >
+      {{ feedbackMessage }}
+    </v-alert>
+
     <v-row class="d-flex mb-3">
       <v-col cols="12">
         <v-label class="font-weight-bold mb-1">
@@ -50,7 +58,6 @@
           type="submit"
           color="primary"
           :loading="isSubmitting"
-          @click="register"
         >
           Cadastrar
         </v-btn>
@@ -60,7 +67,6 @@
 </template>
 
 <script setup lang="ts">
-import axios from 'axios'
 import {
   object,
   string,
@@ -69,6 +75,8 @@ import {
   useForm,
   useField,
 } from 'vee-validate'
+
+import { useAuthStore } from '@/stores/auth'
 
 defineOptions({
   name: 'RegisterForm',
@@ -104,18 +112,27 @@ const { value: firstName } = useField('first_name')
 const { value: email } = useField('email')
 const { value: password } = useField('password')
 
-const submit = handleSubmit(async (values, ctx) => {
-  console.log(values)
-  console.log(ctx)
+const feedbackMessage = ref<string | null>()
+
+const submit = handleSubmit(async ({ first_name, password, email }) => {
+  feedbackMessage.value = null
+
+  const useAuth = useAuthStore()
+
+  const response = await useAuth.register({
+    email,
+    password,
+    first_name,
+  })
+
+  const hasFailed = 'error' in response
+
+  feedbackMessage.value = hasFailed
+    ? response.message
+    : null
+
+  if (hasFailed) return
+
+  console.log('deu bom')
 })
-
-function register () {
-  const data = {
-    'first_name': 'Test',
-    'email': 'test2@test.com',
-    'password': '12345678A',
-  }
-
-  axios.post('/api/register', data)
-}
 </script>

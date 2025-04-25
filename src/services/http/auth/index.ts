@@ -3,7 +3,10 @@ import type {
   AuthResponse,
   IncomingExternalData,
 } from '@/types'
-import type { LoginRequiredPayload } from '@/types/auth'
+import type {
+  LoginRequiredPayload,
+  RegisterRequiredPayload,
+} from '@/types/auth'
 
 import axios from 'axios'
 
@@ -37,4 +40,16 @@ export default {
         })
       })
   },
+
+  async register (payload: RegisterRequiredPayload, defaultErrorMessage = 'Falha ao registrar os dados.'): Promise<AuthResponse<IncomingExternalData<User>>> {
+    return await axios
+      .post<IncomingExternalData<User>>('/api/register', payload)
+      .then(response => response.data)
+      .catch(error => {
+        return defaultErrorPattern({
+          error: error?.response?.data?.error ?? 'Unexpected',
+          message: error?.response?.data?.message ?? defaultErrorMessage,
+        })
+      })
+  }
 }

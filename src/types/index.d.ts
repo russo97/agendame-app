@@ -18,8 +18,9 @@ export interface IncomingExternalData <T = unknown> {
 
 export interface User {
   id: number;
-  name: string;
   email: string;
+  first_name: string;
+  last_name?: string;
 }
 
 export type AuthResponse <T> = T | ErrorPattern;
